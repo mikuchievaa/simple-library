@@ -5,5 +5,18 @@ import (
 )
 
 func main(){
-	fmt.Printf()
+	user1 := Reader{
+		ID: 1,
+		FirstName: "Ilona",
+		LastName: "Valieva",
+		IsActive: true,
+	}
+
+	fmt.Println(user1)
+	user1.DisplayReader()
+	user1.Deactivate()
+	user1.Activate()
+	fmt.Println(user1)
 }
+
+
