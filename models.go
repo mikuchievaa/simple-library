@@ -15,7 +15,6 @@ type Book struct {
 	Author   string
 	Year int
 	IsIssued bool
-	Owner *Reader
 	ReaderId *int
 }
 
@@ -48,7 +47,7 @@ func (b Book) String() string {
 	return fmt.Sprintf("%s (%s, %d)", b.Title, b.Author, b.Year)
 }
 
-func (b *Book) IssueBook(r Reader){
+func (b *Book) IssueBook(r *Reader){
 	if b.IsIssued{
 		fmt.Printf(" Книга %s уже выдана другому посетителю библиотеки, выберите другую\n", b.Title)
 		return
@@ -58,7 +57,7 @@ func (b *Book) IssueBook(r Reader){
 	// 	return
 	// }
 	b.IsIssued = true
-	b.Owner = &Reader.ID
+	b.ReaderId = &r.ID
 	fmt.Printf("Книга %s выдана: %s %s\n", b.Title, r.FirstName, r.LastName )
 }
 
@@ -68,6 +67,6 @@ func (b *Book) ReturnBook(){
 		return
 	}
 	b.IsIssued = false
-	b.Owner = nil 
+	b.ReaderId = nil 
 	fmt.Printf("Книга %s возвращена\n", b.Title)
 }
