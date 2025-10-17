@@ -1,44 +1,68 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
+func main(){
+	lib := &Library{}
 
-func main() {
-	fmt.Println("Запуск системы управления библиотекой")
+		// Добавляем книги
+	book1 := lib.AddBook("Как исключить надоедливого студента 2", "Газзаев Батраз", 1869)
+	book2 := lib.AddBook("Биография Юлия Цезаря ", "Гобозов Богдан", 1866)
+	book3 := lib.AddBook("1000 и 1 отмазка для прогуливания пар", "Газзаев Батраз и Гобозов Богдан", 1967)
+	
+	// Добавляем читателей
+	reader1 := lib.AddReader("Иван", "Иванов")
+	reader2 := lib.AddReader("Петр", "Петров")
 
-	//1. Создаем экземпляр библиотеки
-	myLibrary := &Library{} //Пустая библиотека готова к работе
 
-	fmt.Println("Наполняем библиотеку")
-	//2. Добавляем читателей
-	myLibrary.AddReader("Агунда", "Кокойти")
-	myLibrary.AddReader("Сергей", "Меняйло")
 
-	//3. Добавляем книги
-	myLibrary.AddBook("1984", "Джордж Оруэлл", 1949)
-	myLibrary.AddBook("Мастер и Маргарита", "Михаил Булгаков", 1967)
+// Демонстрация работы ListAllBooks - первоначальное состояние
+	fmt.Println("\n--- ПЕРВОНАЧАЛЬНЫЙ КАТАЛОГ ---")
+	lib.ListAllBooks()
 
-	fmt.Println("\n---Библиотека готова к работе---")
-	fmt.Println("Количество читателей:", len(myLibrary.Readers))
-	fmt.Println("Количество книг:", len(myLibrary.Books))
-
-	//Модуль 16. Практикум
-	fmt.Println("---Тестируем выдачу книг---")
-	//Выдаем книгу 1 читателю 1
-	err := myLibrary.IssueBookToReader(1, 1)
+	fmt.Println("\n=== Тест успешной выдачи ===")
+	err := lib.IssueBookToReader(book1.ID, reader1.ID)
 	if err != nil {
-		fmt.Println("Ошибка выдачи", err)
+		fmt.Printf("Ошибка: %v\n", err)
 	}
 
-	//Проверить статус книги после выдачи
-	book, _ := myLibrary.FindBookByID(1)
-	if book != nil {
-		fmt.Println("Статус книги после выдачи:", book)
-	}
-
-	//Попытка выдать несуществующую книгу
-	err = myLibrary.IssueBookToReader(99, 1)
+	fmt.Println("\n=== Тест успешной выдачи второй книги ===")
+	err = lib.IssueBookToReader(book2.ID, reader2.ID)
 	if err != nil {
-		fmt.Println("Ожидаемая ошибка:", err)
+		fmt.Printf("Ошибка: %v\n", err)
 	}
 
-}
+	// Демонстрация работы ListAllBooks - после выдачи книг
+	fmt.Println("\n--- КАТАЛОГ ПОСЛЕ ВЫДАЧИ КНИГ ---")
+	lib.ListAllBooks()
+
+	fmt.Println("\n=== Тест ошибки (книга не найдена) ===")
+	err = lib.IssueBookToReader(999, reader1.ID)
+	if err != nil {
+		fmt.Printf("Ошибка: %v\n", err)
+	}
+
+	fmt.Println("\n=== Тест ошибки (читатель не найден) ===")
+	err = lib.IssueBookToReader(book3.ID, 999)
+	if err != nil {
+		fmt.Printf("Ошибка: %v\n", err)
+	}
+
+	fmt.Println("\n=== Тест повторной выдачи ===")
+	err = lib.IssueBookToReader(book1.ID, reader2.ID)
+	if err != nil {
+		fmt.Printf("Ошибка: %v\n", err)
+	}
+
+	// Возврат книги и демонстрация изменений
+	fmt.Println("\n--- ТЕСТИРУЕМ ВОЗВРАТ КНИГИ ---")
+	book1.ReturnBook()
+
+	// Финальная демонстрация работы ListAllBooks
+	fmt.Println("\n--- ФИНАЛЬНЫЙ КАТАЛОГ ---")
+	lib.ListAllBooks()
+}	
+
+
+
