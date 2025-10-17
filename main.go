@@ -4,10 +4,6 @@ import (
 	"fmt"
 )
 
-type Storable interface{
-	Save() error
-	Load() error
-}
 
 
 func main(){
@@ -45,6 +41,4 @@ func main(){
 	fmt.Println("Ожидаемая ошибка:", err)
 	}
 }	
-
-
 
