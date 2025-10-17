@@ -1,3 +1,3 @@
-module github.com/Ilona-V/simple-library
+module github.com/mikuchievaa/simple-library
 
 go 1.25.0
