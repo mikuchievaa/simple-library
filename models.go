@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Book struct {
@@ -24,8 +25,7 @@ func (b *Book) IssueBook(reader *Reader) error {
 	}
 	b.IsIssued = true
 	b.ReaderID = &reader.ID
-	//fmt.Println больше не нужен. Сообщение об успехе будет выводить вызывающий код
-	//fmt.Printf("Книга '%s' была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
+	
 	return nil //Книга успешно выдана
 }
 
@@ -46,12 +46,6 @@ type Reader struct {
 	LastName  string
 	IsActive  bool
 }
-
-// DisplayReader выводит полную информацию о пользователе
-//Этот метод больше не нужен, потому что мы реализовали String() для Reader
-/*func (r Reader) DisplayReader() {
-	fmt.Printf("Читатель: %s %s (ID: %d)\n", r.FirstName, r.LastName, r.ID)
-}*/
 
 func (r Reader) String() string {
 	status := ""
@@ -87,20 +81,23 @@ type Library struct {
 }
 
 func (lib *Library) AddReader(firstName, lastName string) *Reader {
-	lib.lastReaderID++
+	firstName = strings.TrimSpace(firstName)
+    lastName = strings.TrimSpace(lastName)
+    if firstName == "" || lastName == "" {
+        return nil
+    }
 
-	//Создаем нового читателя
+	lib.lastReaderID++
 	newReader := &Reader{
 		ID:        lib.lastReaderID,
 		FirstName: firstName,
 		LastName:  lastName,
-		IsActive:  true, //Новый читатель всегда активный
+		IsActive:  true,
 	}
+	
 
 	//Добавляем читателя в срез
 	lib.Readers = append(lib.Readers, newReader)
-
-	fmt.Printf("Зарегистрирован новый читатель: %s %s \n", firstName, lastName)
 	return newReader
 }
 
@@ -120,7 +117,6 @@ func (lib *Library) AddBook(title, author string, year int) *Book {
 	//Добавляем новую книгу в библиотеку
 	lib.Books = append(lib.Books, newBook)
 
-	fmt.Printf("Добавлена новая книга: %s\n", newBook)
 	return newBook
 }
 
@@ -169,15 +165,18 @@ func (lib *Library) IssueBookToReader(bookID, readerID int) error {
 }
 
 func (lib *Library) ReturnBook(bookID int) error {
-	lib.FindBookByID(bookID)
+	book, err := lib.FindBookByID(bookID)
+	if err!=nil{
+		return err
+	}
+	return book.ReturnBook()
 }
 
 // ListAllBooksПоказывает все книги в библиотеке
-func (lib *Library) ListAllBooks() {
-	fmt.Println("---Список всех книг---")
+func (lib *Library) GetAllBooks() {
 	for i, book := range lib.Books {
 		fmt.Println(i+1, book)
 	}
 
-	fmt.Println("----------------------")
+
 }
