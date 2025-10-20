@@ -13,29 +13,31 @@ type Book struct {
 	ReaderID *int //ID читателя, который взял книгу
 }
 
-// IssueBook выдает книгу читателю
+// IssueBook выдает книгу читателю. Теперь возвращает ошибку.
 func (b *Book) IssueBook(reader *Reader) error {
 	if b.IsIssued {
+		//Теперь возвращаем ошибку, а не печатаем в консоль
 		return fmt.Errorf("книга '%s' уже выдана", b.Title)
 	}
 	if !reader.IsActive {
-		return fmt.Errorf("читатель %s %s не активен", reader.FirstName, reader.LastName)
+		return fmt.Errorf("читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
 	}
 	b.IsIssued = true
 	b.ReaderID = &reader.ID
-	fmt.Printf("Книга '%s' была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
-	return nil
+	//fmt.Println больше не нужен. Сообщение об успехе будет выводить вызывающий код
+	//fmt.Printf("Книга '%s' была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
+	return nil //Книга успешно выдана
 }
 
 // ReturnBook возвращает книгу в библиотеку
-func (b *Book) ReturnBook() {
+func (b *Book) ReturnBook() error {
+	//Нужно будет реализовать с учетом нового в проекте
 	if !b.IsIssued {
-		fmt.Printf("Книга '%s' и так в библиотеке", b.Title)
-		return
+		return fmt.Errorf("книга '%s' и так в библиотеке", b.Title)
 	}
 	b.IsIssued = false
 	b.ReaderID = nil
-	fmt.Printf("Книга '%s' возвращена в библиотеку\n", b.Title)
+	return nil
 }
 
 type Reader struct {
@@ -44,6 +46,12 @@ type Reader struct {
 	LastName  string
 	IsActive  bool
 }
+
+// DisplayReader выводит полную информацию о пользователе
+//Этот метод больше не нужен, потому что мы реализовали String() для Reader
+/*func (r Reader) DisplayReader() {
+	fmt.Printf("Читатель: %s %s (ID: %d)\n", r.FirstName, r.LastName, r.ID)
+}*/
 
 func (r Reader) String() string {
 	status := ""
@@ -65,7 +73,7 @@ func (b Book) String() string {
 	if b.IsIssued && b.ReaderID != nil {
 		status = fmt.Sprintf("на руках у читателя с ID %d", *b.ReaderID)
 	}
-	return fmt.Sprintf("%s (%s, %d), статус %s", b.Title, b.Author, b.Year, status)
+	return fmt.Sprintf("%s (%s, %d), статус: %s", b.Title, b.Author, b.Year, status)
 }
 
 // Library - наша центральная структура-агрегатор
@@ -123,7 +131,8 @@ func (lib *Library) FindBookByID(id int) (*Book, error) {
 			return book, nil
 		}
 	}
-	return nil, fmt.Errorf("книга с ID %d не найдена", id)
+
+	return nil, fmt.Errorf("книга с ID %d не найдена в библиотеке", id)
 }
 
 // FindReaderByID ищет читателя по его уникальному ID
@@ -133,101 +142,42 @@ func (lib *Library) FindReaderByID(id int) (*Reader, error) {
 			return reader, nil
 		}
 	}
+
 	return nil, fmt.Errorf("читатель с ID %d не найден", id)
 }
 
 // IssueBookToReader - основной публичный метод для выдачи книги
 func (lib *Library) IssueBookToReader(bookID, readerID int) error {
-	// Находим книгу по ID
+	//1. Найти книгу
 	book, err := lib.FindBookByID(bookID)
 	if err != nil {
-		return err // возвращаем ошибку если книга не найдена
+		return err
 	}
 
-	// Находим читателя по ID
+	//2. Найти читателя
 	reader, err := lib.FindReaderByID(readerID)
 	if err != nil {
-		return err // возвращаем ошибку если читатель не найден
+		return err
 	}
 
-	// Выдаем книгу читателю с помощью метода IssueBook
+	//Вызываем обновленный метод и ПРОВЕРЯЕМ ОШИБКУ
 	err = book.IssueBook(reader)
 	if err != nil {
-		return err // возвращаем ошибку если выдача не удалась
+		return err
 	}
-
-	return nil // успешное выполнение
+	return nil //Все 3 шага прошли успешно
 }
 
-// ListAllBooks выводит информацию о всех книгах в библиотеке
+func (lib *Library) ReturnBook(bookID int) error {
+	lib.FindBookByID(bookID)
+}
+
+// ListAllBooksПоказывает все книги в библиотеке
 func (lib *Library) ListAllBooks() {
-	fmt.Println("\n=== КАТАЛОГ ВСЕХ КНИГ В БИБЛИОТЕКЕ ===")
-	if len(lib.Books) == 0 {
-		fmt.Println("В библиотеке нет книг")
-		return
-	}
-	
-	for _, book := range lib.Books {
-		fmt.Println(book)
-	}
-	fmt.Println("=== КОНЕЦ КАТАЛОГА ===")
-}
-
-func mainn() {
-	lib := &Library{}
-
-	// Добавляем книги
-	book1 := lib.AddBook("Война и мир", "Лев Толстой", 1869)
-	book2 := lib.AddBook("Преступление и наказание", "Федор Достоевский", 1866)
-	book3 := lib.AddBook("Мастер и Маргарита", "Михаил Булгаков", 1967)
-	
-	// Добавляем читателей
-	reader1 := lib.AddReader("Иван", "Иванов")
-	reader2 := lib.AddReader("Петр", "Петров")
-
-	// Демонстрация работы ListAllBooks - первоначальное состояние
-	fmt.Println("\n--- ПЕРВОНАЧАЛЬНЫЙ КАТАЛОГ ---")
-	lib.ListAllBooks()
-
-	fmt.Println("\n=== Тест успешной выдачи ===")
-	err := lib.IssueBookToReader(book1.ID, reader1.ID)
-	if err != nil {
-		fmt.Printf("Ошибка: %v\n", err)
+	fmt.Println("---Список всех книг---")
+	for i, book := range lib.Books {
+		fmt.Println(i+1, book)
 	}
 
-	fmt.Println("\n=== Тест успешной выдачи второй книги ===")
-	err = lib.IssueBookToReader(book2.ID, reader2.ID)
-	if err != nil {
-		fmt.Printf("Ошибка: %v\n", err)
-	}
-
-	// Демонстрация работы ListAllBooks - после выдачи книг
-	fmt.Println("\n--- КАТАЛОГ ПОСЛЕ ВЫДАЧИ КНИГ ---")
-	lib.ListAllBooks()
-
-	fmt.Println("\n=== Тест ошибки (книга не найдена) ===")
-	err = lib.IssueBookToReader(999, reader1.ID)
-	if err != nil {
-		fmt.Printf("Ошибка: %v\n", err)
-	}
-
-	fmt.Println("\n=== Тест ошибки (читатель не найден) ===")
-	err = lib.IssueBookToReader(book3.ID, 999)
-	if err != nil {
-		fmt.Printf("Ошибка: %v\n", err)
-	}
-
-	fmt.Println("\n=== Тест повторной выдачи ===")
-	err = lib.IssueBookToReader(book1.ID, reader2.ID)
-	if err != nil {
-		fmt.Printf("Ошибка: %v\n", err)
-	}
-
-	// Возврат книги и демонстрация изменений
-	fmt.Println("\n--- ТЕСТИРУЕМ ВОЗВРАТ КНИГИ ---")
-	book1.ReturnBook()
-
-	// Финальная демонстрация работы ListAllBooks
-	fmt.Println("\n--- ФИНАЛЬНЫЙ КАТАЛОГ ---")
-	lib.ListAllBooks()
+	fmt.Println("----------------------")
 }

@@ -24,21 +24,63 @@ func main() {
 	//Модуль 16. Практикум
 	fmt.Println("---Тестируем выдачу книг---")
 	//Выдаем книгу 1 читателю 1
+	fmt.Println("Попытка выдать книгу 1 читателю 1")
 	err := myLibrary.IssueBookToReader(1, 1)
 	if err != nil {
-		fmt.Println("Ошибка выдачи", err)
+		fmt.Println("Ошибка выдачи:", err)
+	} else {
+		fmt.Println("Книга успешно выдана")
 	}
 
-	//Проверить статус книги после выдачи
-	book, _ := myLibrary.FindBookByID(1)
-	if book != nil {
-		fmt.Println("Статус книги после выдачи:", book)
+	//Попытка выдать ту же книгу еще раз
+	fmt.Println("Поптка выдать уже выданную книгу")
+	err = myLibrary.IssueBookToReader(1, 2)
+	if err != nil {
+		fmt.Println("Ошибка выдачи:", err)
+	} else {
+		fmt.Println("Книга успешно выдана")
 	}
 
-	//Попытка выдать несуществующую книгу
+	fmt.Println("Попытка выдать несуществующую книгу")
 	err = myLibrary.IssueBookToReader(99, 1)
 	if err != nil {
-		fmt.Println("Ожидаемая ошибка:", err)
+		fmt.Println("Ошибка выдачи:", err)
+	} else {
+		fmt.Println("Книга успешно выдана")
 	}
 
+	fmt.Println("Попытка выдать книгу несуществующему читателю")
+	err = myLibrary.IssueBookToReader(2, 99)
+	if err != nil {
+		fmt.Println("Ошибка выдачи:", err)
+	} else {
+		fmt.Println("Книга успешно выдана")
+	}
+
+	fmt.Println()
+
+	//Смотрим все книги в библиотеке
+	myLibrary.ListAllBooks()
+
+	fmt.Println("Поиск порта")
+	config := map[string]string{
+		"PORT": "456",
+	}
+
+	port, err := GetPortFromConfig(config)
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+	} else {
+		fmt.Println(port)
+	}
+
+	config = map[string]string{
+		"tort": "medivik",
+	}
+	port, err = GetPortFromConfig(config)
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+	} else {
+		fmt.Println(port)
+	}
 }
