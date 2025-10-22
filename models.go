@@ -31,13 +31,20 @@ func (b *Book) IssueBook(reader *Reader) error {
 
 // ReturnBook возвращает книгу в библиотеку
 func (b *Book) ReturnBook() error {
-	//Нужно будет реализовать с учетом нового в проекте
 	if !b.IsIssued {
 		return fmt.Errorf("книга '%s' и так в библиотеке", b.Title)
 	}
 	b.IsIssued = false
 	b.ReaderID = nil
 	return nil
+}
+
+func (b Book) String() string {
+	status := "в библиотеке"
+	if b.IsIssued && b.ReaderID != nil {
+		status = fmt.Sprintf("на руках у читателя с ID %d", *b.ReaderID)
+	}
+	return fmt.Sprintf("%s (%s, %d), статус: %s", b.Title, b.Author, b.Year, status)
 }
 
 type Reader struct {
@@ -62,13 +69,10 @@ func (r *Reader) Deactivate() {
 	r.IsActive = false
 }
 
-func (b Book) String() string {
-	status := "в библиотеке"
-	if b.IsIssued && b.ReaderID != nil {
-		status = fmt.Sprintf("на руках у читателя с ID %d", *b.ReaderID)
-	}
-	return fmt.Sprintf("%s (%s, %d), статус: %s", b.Title, b.Author, b.Year, status)
+func (r *Reader) Activate(){
+	r.IsActive = true
 }
+
 
 // Library - наша центральная структура-агрегатор
 type Library struct {
@@ -173,10 +177,8 @@ func (lib *Library) ReturnBook(bookID int) error {
 }
 
 // ListAllBooksПоказывает все книги в библиотеке
-func (lib *Library) GetAllBooks() {
-	for i, book := range lib.Books {
-		fmt.Println(i+1, book)
-	}
+func (lib *Library) GetAllBooks() []*Book{
+	return lib.Books
 
 
 }
