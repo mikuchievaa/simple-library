@@ -7,6 +7,9 @@ import (
 
 func main() {
     myLibrary := library.New()
+
+    
+
     myLibrary.AddBook("Война и мир","Лев Толстой",1763)
 	myLibrary.AddBook("Преступление и наказание","Ф.М. Достоевский",1343)
 
